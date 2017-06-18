@@ -3,5 +3,6 @@
   "version": "0.0.1",
   "description": "utility functions like log, retry, trim, ...",
   "install": "make install",
-  "repo": "cha87de/bashutil"
+  "repo": "cha87de/bashutil",
+  "global": true,
 }
