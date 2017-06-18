@@ -5,4 +5,5 @@
   "install": "make install",
   "repo": "cha87de/bashutil",
   "global": true,
+  "scripts": ["log", "error", "trim", "retry"]
 }
