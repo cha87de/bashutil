@@ -2,6 +2,6 @@
   "name": "bashutil",
   "version": "0.0.1",
   "description": "utility functions like log, retry, trim, ...",
-  "global": true,
-  "install": "make install"
+  "install": "make install",
+  "repo": "cha87de/bashutil"
 }
