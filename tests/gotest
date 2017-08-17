@@ -1,0 +1,13 @@
+#!/bin/bash
+source ../bgo
+source ../bgowait
+
+function sleep10(){
+    sleep 10
+}
+function sleep5(){
+    sleep 5
+}
+
+bgo "sleep10" "echo bla" "sleep5"
+bgowait 1 2 1

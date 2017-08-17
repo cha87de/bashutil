@@ -1,6 +1,6 @@
 BIN ?= bashutil
 PREFIX ?= /usr/local
-CMDS = log error trim retry
+CMDS = log error trim retry bgo bgowait
 
 install: uninstall
 	#install $(BIN) $(PREFIX)/bin
