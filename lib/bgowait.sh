@@ -21,7 +21,7 @@ function bgowait(){
     if (( $# > 0 )); then waitforN=$1; shift ; else waitforN=-1; fi
     if (( $# > 0 )); then killTasks=$1; shift ; else killTasks=0; fi
 
-    if [[ ! -f /tmp/bgo ]]; then return fi
+    if [[ ! -f /tmp/bgo ]]; then return ; fi
 
     totalTasks=$(wc -l /tmp/bgo | cut -d' ' -f1)
     finishedTasks=0
