@@ -28,17 +28,14 @@ function bgowait(){
 
     while true; do
         for pid in $(cat /tmp/bgo) ; do
-            echo "checking $pid"
             kill -0 $pid 2> /dev/null ; pidCheck=$?
             if [[ $pidCheck  == 0 ]] ; then
                 # task still running
                 continue
             else
                 # task stopped. remove from list.
-                echo "remove $pid"
                 sed -i "/$pid/d" /tmp/bgo
                 let finishedTasks+=1
-                echo "$finishedTasks" ">=" "$waitforN"
                 if (( "$finishedTasks" >= "$waitforN" )); then
                     # done with waiting...
                     break 2

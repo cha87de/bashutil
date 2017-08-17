@@ -15,13 +15,15 @@
 
 function bgo(){
     touch /tmp/bgo
-	for task in "$@"; do
-        echo "start task $task"
+	  for task in "$@"; do
         $task &
-        echo $! >> /tmp/bgo
-	done
-
-    cat /tmp/bgo
+        ret=$?; pid=$!
+        if [[ $ret > 0 ]] ; then
+          return $ret
+        fi
+        echo $pid >> /tmp/bgo
+    done
+    return 0
 }
 
 if [[ ${BASH_SOURCE[0]} != $0 ]]; then
