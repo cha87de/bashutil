@@ -21,7 +21,8 @@ function bgo(){
         if [[ $ret > 0 ]] ; then
           return $ret
         fi
-        echo $pid >> /tmp/bgo
+        echo "$pid ${task}" >> /tmp/bgo
+        echo "started ${task} as $pid"
     done
     return 0
 }

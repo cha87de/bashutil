@@ -29,14 +29,16 @@ function bgowait(){
     if [[ $waitforN == -1 ]]; then waitforN=$totalTasks; fi
 
     while true; do
-        for pid in $(cat /tmp/bgo) ; do
+        for pid in $(cat /tmp/bgo | cut -d' ' -f1) ; do
             kill -0 $pid 2> /dev/null ; pidCheck=$?
             if [[ $pidCheck  == 0 ]] ; then
                 # task still running
                 continue
             else
                 # task stopped. remove from list.
-                sed -i "/$pid/d" /tmp/bgo
+                taskline=$(cat /tmp/bgo | grep "$pid ")
+                echo "task ended: ${taskline}"
+                sed -i "/$pid */d" /tmp/bgo
                 let finishedTasks+=1
                 if (( "$finishedTasks" >= "$waitforN" )); then
                     # done with waiting...
@@ -51,10 +53,10 @@ function bgowait(){
 
     if [[ $killTasks == 1 ]]; then
         # kill remaining and running tasks
-        for pid in $(cat /tmp/bgo) ; do
-            echo "kill $pid"
+        for pid in $(cat /tmp/bgo | cut -d' ' -f1) ; do
+            echo "killing task $pid ..."
             kill -1 $pid 2> /dev/null
-            sed -i "/$pid/d" /tmp/bgo
+            sed -i "/$pid */d" /tmp/bgo
         done
     fi
 

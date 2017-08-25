@@ -10,4 +10,7 @@ function sleep5(){
 }
 
 bgo "sleep10" "echo bla" "sleep5"
+echo "---"
+cat /tmp/bgo
+echo "---"
 bgowait 1 2 1
