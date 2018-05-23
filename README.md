@@ -15,4 +15,65 @@ To install bpkg, run `curl -sLo- http://get.bpkg.sh | bash`.
 
 ## Usage
 
-tbd
+
+### bgo & bgowait
+
+The tools bgo and bgowait allow to start a group of processes and wait for them. Example usage:
+
+```
+#!/bin/bash
+source lib/bgo.sh
+source lib/bgowait.sh
+
+function sleeper(){
+    sleep 50
+    return 0
+}
+function timer(){
+    sleep 1
+    date
+    return 0
+}
+
+# start
+
+bgo sleeper timer
+
+# wait
+
+#freq=5; waitForN=-1; killTasks=0 # fail one, ignore (e.g. development mode)
+freq=5; waitForN=1; killTasks=1 #fail one, fail all (e.g. production mode)
+bgowait $freq $waitForN $killTasks
+```
+
+The option `--waitgroup` allows to run more than one bgo & bgowait pair in parallel, with a different set of processes to wait for. If no wait group is specified, bgowait assumes all processes started with bgo - **system wide**.
+Example usage with wait groups:
+
+```
+#!/bin/bash
+source lib/bgo.sh
+source lib/bgowait.sh
+
+function sleeper(){
+    sleep 50
+    return 0
+}
+function timer(){
+    sleep 1
+    date
+    return 0
+}
+
+# start
+
+bgo -g group1 sleeper timer
+bgo -g group2 timer
+
+# wait
+
+freq=5; waitForN=-1; killTasks=0 # fail one, ignore
+bgowait -g group1 $freq $waitForN $killTasks
+
+freq=5; waitForN=1; killTasks=1 #fail one, fail all
+bgowait -g group2 $freq $waitForN $killTasks
+```

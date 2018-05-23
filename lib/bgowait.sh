@@ -4,6 +4,12 @@
 # when one or all tasks have finished (optionally kills remaining
 # tasks).
 #
+# Call syntax: bgowait [parameters] arguments
+#
+# Parameters:
+#   -g --waitgroup   [OPTIONAL] Name group specified in bgo, to wait on
+#                    processes in this group only 
+#
 # Arguments:
 #   freq             Frequency how often tasks are checked (default 5s)
 #   waitforN         Amount of tasks having finished to return (-1 for all tasks)
@@ -17,28 +23,48 @@
 #######################################
 
 function bgowait(){
+
+    POSITIONAL=()
+    while [[ $# -gt 0 ]]; do
+      key="$1"
+      case $key in
+          -g|--waitgroup)
+          WAITGROUP="$2"
+          shift # past argument
+          shift # past value
+          ;;
+          *)    # unknown option
+          POSITIONAL+=("$1") # save it in an array for later
+          shift # past argument
+          ;;
+      esac
+    done
+    set -- "${POSITIONAL[@]}" # restore positional parameters
+
     if (( $# > 0 )); then freq=$1; shift ; else freq=5; fi
     if (( $# > 0 )); then waitforN=$1; shift ; else waitforN=-1; fi
     if (( $# > 0 )); then killTasks=$1; shift ; else killTasks=0; fi
 
-    if [[ ! -f /tmp/bgo ]]; then return ; fi
+    statefile=/tmp/bgo-${WAITGROUP}
 
-    totalTasks=$(wc -l /tmp/bgo | cut -d' ' -f1)
+    if [[ ! -f $statefile ]]; then return ; fi
+
+    totalTasks=$(wc -l $statefile | cut -d' ' -f1)
     finishedTasks=0
 
     if [[ $waitforN == -1 ]]; then waitforN=$totalTasks; fi
 
     while true; do
-        for pid in $(cat /tmp/bgo | cut -d' ' -f1) ; do
+        for pid in $(cat $statefile | cut -d' ' -f1) ; do
             kill -0 $pid 2> /dev/null ; pidCheck=$?
             if [[ $pidCheck  == 0 ]] ; then
                 # task still running
                 continue
             else
                 # task stopped. remove from list.
-                taskline=$(cat /tmp/bgo | grep "$pid ")
+                taskline=$(cat $statefile | grep "$pid ")
                 echo "task ended: ${taskline}"
-                sed -i "/$pid */d" /tmp/bgo
+                sed -i "/$pid */d" $statefile
                 let finishedTasks+=1
                 if (( "$finishedTasks" >= "$waitforN" )); then
                     # done with waiting...
@@ -53,14 +79,14 @@ function bgowait(){
 
     if [[ $killTasks == 1 ]]; then
         # kill remaining and running tasks
-        for pid in $(cat /tmp/bgo | cut -d' ' -f1) ; do
+        for pid in $(cat $statefile | cut -d' ' -f1) ; do
             echo "killing task $pid ..."
             kill -1 $pid 2> /dev/null
-            sed -i "/$pid */d" /tmp/bgo
+            sed -i "/$pid */d" $statefile
         done
     fi
 
-    rm /tmp/bgo
+    rm $statefile
 }
 
 if [[ ${BASH_SOURCE[0]} != $0 ]]; then
